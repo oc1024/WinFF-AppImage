@@ -1,18 +1,50 @@
 app: winff-qt
 
 ingredients:
-  dist: stretch
+  dist: xenial
   sources:
     - deb http://deb.debian.org/debian/ stretch main
   exclude:
-    - winff-gtk
-    - ffmpeg
-    - avconv
     - xterm
-    - libavcodec-extra
 
 script:
   - mv usr/share/applications/winff.desktop .
   - convert usr/share/icons/hicolor/scalable/apps/winff.svg -resize 256x256 ./winff.png
+  - echo BINPATCHING winff
+  - sed -i -e 's|/usr|././|g' usr/bin/winff-qt
+  - sed -i -e s@././/bin/env@/usr/bin/env@g usr/bin/winff-qt
+  - echo BINPATCHED winff
   - mv usr/share/winff/* usr/bin # workaround for cant find presets
-  - ln -s winff-qt usr/bin/winff
+  - ln -s winff-qt usr/bin/winff # workaround for desktopfile
+  - mkdir -p usr/share/applications/metainfo
+  - cat > usr/share/applications/metainfo/com.biggmatt.winff.metainfo.xml <<EOF
+  - <?xml version="1.0" encoding="UTF-8"?>
+  - <component type="desktop-application">
+  -   <id>com.biggmatt.winff</id>
+  -   
+  -   <name>WinFF</name>
+  -   <summary>GUI for the command line video converter FFmpeg</summary>
+  -   
+  -   <metadata_license>MIT</metadata_license>
+  -   <project_license>GPL-3.0-or-later</project_license>
+  -   
+  -   <description>
+  -     <p>
+  -       WinFF is a GUI for the command line video converter, FFMPEG. It will convert most video files that FFmpeg can convert. For example, you can convert your camera, phone, and internet videos into videos for multiple phones, websites, and media players.
+  -     </p>
+  -     <p>
+  -       WinFF provides a variety of preset conversion settings for common formats and devices. These presets are intended to hit the "sweet spot" for each individual codec. They have been written with a tip of the balance to quality. 
+  -     </p>
+  -     <p>
+  -         Official packages exist for Windows XP through 10, Debian and Ubuntu. This port to AppImage is not connected to its author and is based on the Qt4 version for Debian 9.
+  -     </p>
+  -   </description>
+  -   
+  -   <launchable type="desktop-id">winff.desktop</launchable>
+  -   <screenshots>
+  -     <screenshot type="default">
+  -       <image>https://raw.githubusercontent.com/WinFF/winff/master/media/screenshot.jpg</image>
+  -     </screenshot>
+  -   </screenshots>
+  - </component>
+  - EOF
